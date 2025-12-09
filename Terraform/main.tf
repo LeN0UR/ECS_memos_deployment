@@ -91,7 +91,7 @@ module "security_groups" {
   ecs_sg_name     = "memos ecs sg"
   allow_all_cidr  = "0.0.0.0/0"
   http_port       = var.http_port
-  https_port      = var.https_port   
+  https_port      = var.https_port
   app_port        = var.app_port
   environment_tag = var.environment_tag
 }
@@ -177,8 +177,8 @@ module "ecs" {
 module "route53" {
   source = "./Modules/route53"
 
-  domain_name       = var.domain_name 
+  domain_name       = var.domain_name
   alb_dns_name      = module.alb.alb_dns_name
   alb_zone_id       = module.alb.alb_zone_id
-  create_www_record = true 
+  create_www_record = true
 }
