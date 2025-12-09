@@ -1,0 +1,59 @@
+# .github/workflows/deploy.yml
+name: Terraform Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "Terraform/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+jobs:
+  terraform-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      AWS_REGION: eu-west-2
+
+    defaults:
+      run:
+        working-directory: Terraform
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::595552412690:role/ECSCICDRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform fmt
+        run: terraform fmt -check
+
+      - name: Terraform init
+        run: terraform init
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Post-deploy health check
+        run: |
+          curl -f https://tm.<your-domain>/healthz

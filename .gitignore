@@ -1,0 +1,45 @@
+# Terraform
+
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*.tfvars
+*.tfvars.json
+.terraform/
+.terraform.lock.hcl
+
+
+# Docker
+# (Already have .dockerignore separately, but this avoids checking in local build artifacts)
+docker-image.tar
+
+
+# Go (Memos App Build Files)
+
+# (Code below excludes Go build output)
+memos
+memos.exe
+memos-build/
+bin/
+build/
+
+
+# OS junk
+
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+
+# Logs
+
+*.log
+
+
+# Credentials 
+
+*.pem
+*.key

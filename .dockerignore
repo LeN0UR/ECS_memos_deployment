@@ -1,0 +1,42 @@
+# Git & Repository Files
+.git
+.gitignore
+
+# CI/CD Workflow Files
+.github/
+destroy.yml
+deploy.yml
+ci.yml
+ci-docker.yml
+
+
+# Terraform 
+Terraform/
+*.tf
+*.tfvars
+terraform.tfstate*
+.terraform/
+
+
+# OS junk
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+
+# Docker files 
+Dockerfile
+Dockerfile.*
+
+# Build artifacts 
+memos
+memos.exe
+bin/
+build/
+
+
+# Secrets 
+*.pem
+*.key
+.env
