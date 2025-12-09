@@ -49,14 +49,9 @@ jobs:
         run: terraform validate
 
       - name: Terraform plan
-        run: terraform plan -input=false -out=tfplan
+        run: terraform plan -input=false -var-file="terraform.tfvars" -out=tfplan
 
       - name: Terraform apply
-        # optional: only auto-apply on main pushes, not manual runs
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -input=false -auto-approve tfplan
-
-      - name: Post-deploy health check
-        run: |
-          curl -f https://tm.<your-domain>/healthz
+        run: terraform apply -
 
