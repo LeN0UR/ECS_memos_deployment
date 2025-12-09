@@ -52,7 +52,8 @@ jobs:
         run: terraform plan -input=false -var-file="terraform.tfvars" -out=tfplan
 
       - name: Terraform apply
-    if: github.ref == 'refs/heads/main'
-    run: terraform apply -input=false -auto-approve tfplan
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -input=false -auto-approve tfplan
+
 
 
