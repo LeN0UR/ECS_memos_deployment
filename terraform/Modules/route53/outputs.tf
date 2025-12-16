@@ -12,3 +12,8 @@ output "www_record_fqdn" {
   description = "FQDN of the www A record (if created)"
   value       = var.create_www_record ? aws_route53_record.www_a[0].fqdn : null
 }
+
+output "app_url" {
+  description = "Public URL of the application"
+  value       = "https://www.${var.domain_name}"
+}
