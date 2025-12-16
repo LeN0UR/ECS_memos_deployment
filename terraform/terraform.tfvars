@@ -41,7 +41,8 @@ task_definition_memory = "512" # string, matches variables.tf
 
 container_name = "memos"
 
-container_image = "595552412690.dkr.ecr.eu-west-2.amazonaws.com/new-memos-app:3.0"
+#temporary test
+container_image = "595552412690.dkr.ecr.eu-west-2.amazonaws.com/new-memos-app"
 
 container_environment = {}
 

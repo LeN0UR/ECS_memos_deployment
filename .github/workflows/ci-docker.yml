@@ -3,9 +3,9 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - "Dockerfile"
+      - "docker/Dockerfile"
       - "**/*.go"
       - ".github/workflows/ci-docker.yml"
   workflow_dispatch:
@@ -22,7 +22,7 @@ jobs:
       AWS_REGION: eu-west-2
       AWS_ACCOUNT_ID: "595552412690"
       ECR_REPO: "new-memos-app"
-      IMAGE_TAG: "3.0"   
+      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       - name: Checkout repository
@@ -39,7 +39,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+          docker build -f docker/Dockerfile -t ${ECR_REPO}:${IMAGE_TAG} .
 
       - name: Tag image for ECR
         run: |

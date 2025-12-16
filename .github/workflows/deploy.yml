@@ -3,7 +3,7 @@ name: Terraform Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "terraform/**"
       - ".github/workflows/deploy.yml"
@@ -19,6 +19,9 @@ jobs:
 
     env:
       AWS_REGION: eu-west-2
+      DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+      HEALTHCHECK_PATH: /healthz
+      TF_VAR_image_tag: ${{ github.sha }}
 
     defaults:
       run:
@@ -28,7 +31,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (OIDC)
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::595552412690:role/ECSCICDRole
@@ -55,5 +58,6 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: terraform apply -input=false -auto-approve tfplan
 
-
-
+      - name: Health check
+        if: github.ref == 'refs/heads/main'
+        run: curl -f https://${DOMAIN_NAME}${HEALTHCHECK_PATH}

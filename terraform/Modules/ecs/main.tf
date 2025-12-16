@@ -53,7 +53,7 @@ resource "aws_ecs_task_definition" "memos_task_def" {
   container_definitions = jsonencode([
     {
       name  = var.container_name
-      image = var.container_image
+      image = "${var.container_image}:${var.image_tag}"
 
       portMappings = [
         {

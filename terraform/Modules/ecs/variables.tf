@@ -66,6 +66,12 @@ variable "container_image" {
   type        = string
 }
 
+variable "image_tag" {
+  description = "Docker image tag to deploy (e.g. git SHA)"
+  type        = string
+  default     = "latest"
+}
+
 variable "app_port" {
   description = "Port the application listens on inside the container"
   type        = number

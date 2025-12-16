@@ -134,8 +134,14 @@ variable "container_name" {
 }
 
 variable "container_image" {
-  description = "Full container image URL (e.g. ECR image URI)"
+  description = "Container image repository URI (no tag), e.g. ECR repo URI"
   type        = string
+}
+
+variable "image_tag" {
+  description = "Docker image tag to deploy (e.g. git SHA)"
+  type        = string
+  default     = "latest"
 }
 
 variable "log_stream_prefix" {
