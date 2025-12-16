@@ -59,6 +59,22 @@ jobs:
       - name: Health check
         if: github.ref == 'refs/heads/main'
         run: |
+          # retry health check to allow ECS tasks and ALB to stabilise after deployment
           APP_URL=$(terraform output -raw app_url)
-          curl -f "${APP_URL}/healthz"
+          URL="${APP_URL}/healthz"
+          echo "Checking ${URL}"
+
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            if curl -fsS "${URL}" > /dev/null; then
+              echo "Healthy."
+              exit 0
+            fi
+            echo "Not ready yet. Retrying..."
+            sleep 10
+          done
+
+          echo "Health check failed."
+          exit 1
+
+
 

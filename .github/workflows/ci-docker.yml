@@ -6,6 +6,7 @@ on:
     branches: ["main"]
     paths:
       - "docker/Dockerfile"
+      - "docker/.dockerignore"
       - "**/*.go"
       - ".github/workflows/ci-docker.yml"
   workflow_dispatch:
@@ -49,3 +50,4 @@ jobs:
       - name: Push image to ECR
         run: |
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
+
