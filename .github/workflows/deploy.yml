@@ -19,8 +19,6 @@ jobs:
 
     env:
       AWS_REGION: eu-west-2
-      DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
-      HEALTHCHECK_PATH: /healthz
       TF_VAR_image_tag: ${{ github.sha }}
 
     defaults:
@@ -60,4 +58,7 @@ jobs:
 
       - name: Health check
         if: github.ref == 'refs/heads/main'
-        run: curl -f https://${DOMAIN_NAME}${HEALTHCHECK_PATH}
+        run: |
+          APP_URL=$(terraform output -raw app_url)
+          curl -f "${APP_URL}/healthz"
+

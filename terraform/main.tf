@@ -156,6 +156,7 @@ module "ecs" {
 
   container_name  = var.container_name
   container_image = var.container_image
+  image_tag       = var.image_tag
   app_port        = var.app_port
 
   container_environment = var.container_environment

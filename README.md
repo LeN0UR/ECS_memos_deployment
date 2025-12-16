@@ -112,11 +112,12 @@ Infrastructure is provisioned using **modular Terraform**, with remote state sto
 │   └── .dockerignore
 │
 ├── terraform/
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── providers.tf
 │   ├── backend.tf
+│   ├── main.tf
+│   ├── outputs.tf
+│   ├── provider.tf
 │   ├── terraform.tfvars
+│   ├── variables.tf
 │   └── modules/
 │       ├── alb/
 │       ├── ecs/
