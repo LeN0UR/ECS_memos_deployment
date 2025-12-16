@@ -18,7 +18,6 @@ Key characteristics:
 - Web-based UI
 - SQLite-backed persistence
 - Runs on port `5230`
-- Built from source during Docker image creation
 
 
 ## Demo
@@ -212,7 +211,7 @@ This project can be reproduced locally for container testing, or fully deployed 
 Build and run the application locally using Docker:
 
 ```bash
-docker build -f docker/dockerfile -t memos-local .
+docker build -f docker/Dockerfile -t memos-local .
 docker run -p 5230:5230 memos-local
 Visit: http://localhost:5230
 ```
@@ -220,7 +219,7 @@ Visit: http://localhost:5230
 
 The production environment is deployed automatically via GitHub Actions using OIDC authentication.
 
-Technical steps:
+High-level steps:
 1. Configure AWS IAM trust for GitHub Actions (OIDC)
 2. Update Terraform variables (region, domain, account ID)
 3. Initialise Terraform remote backend (S3 with DynamoDB locking)
