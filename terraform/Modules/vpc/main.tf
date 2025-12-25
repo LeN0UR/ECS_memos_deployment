@@ -1,70 +1,69 @@
-# Generate VPC
-resource "aws_vpc" "memos-vpc" {
+# VPC
+
+resource "aws_vpc" "memos_vpc" {
+  cidr_block           = var.vpc_cidr
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+
   tags = {
-    Name = "memos-vpc"
-    cidr_block = var.vpc_CIDR
-    enable_dns_hostnames = true
-    enable_dns_support   = true
+    Name        = var.vpc_name
+    Environment = var.environment_tag
   }
 }
 
-# Generate Public subnet a
-resource "aws_subnet" "public_subnet_a" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.1.0/24"
-  availability_zone = var.public_subnet_a_az
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.memos_vpc.id
+
+  tags = {
+    Name        = "${var.vpc_name}-igw"
+    Environment = var.environment_tag
+  }
+}
+
+resource "aws_subnet" "public_a" {
+  vpc_id                  = aws_vpc.memos_vpc.id
+  cidr_block              = var.public_subnet_a_cidr
+  availability_zone       = var.public_subnet_a_az
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "Public_subnet_a"
+    Name        = "${var.vpc_name}-public-a"
+    Environment = var.environment_tag
   }
 }
 
-# Generate Public subnet B
-resource "aws_subnet" "public_subnet_b" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.0.3.0/24"
+resource "aws_subnet" "public_b" {
+  vpc_id                  = aws_vpc.memos_vpc.id
+  cidr_block              = var.public_subnet_b_cidr
+  availability_zone       = var.public_subnet_b_az
   map_public_ip_on_launch = true
-  availability_zone = var.public_subnet_b_az
 
   tags = {
-    Name = "Public_subnet_B"
+    Name        = "${var.vpc_name}-public-b"
+    Environment = var.environment_tag
   }
 }
 
-# Generate Route table
 resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.memos_vpc.id
 
-  # Public route to the internet via the Internet Gateway
   route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id
+    cidr_block = var.route_table_cidr
+    gateway_id = aws_internet_gateway.igw.id
   }
 
   tags = {
-    Name = "public-route-table"
+    Name        = "${var.vpc_name}-public-rt"
+    Environment = var.environment_tag
   }
 }
 
-# Generate Internet Gateway
-resource "aws_internet_gateway" "igw-memos" {
-  vpc_id = aws_vpc.main.id
-
-  tags = {
-    Name = "igw-memos"
-  }
-}
-
-# Associate the public subnets with the route tables
-resource "aws_route_table_association" "public_subnet_a" {
-  subnet_id      = aws_subnet.public_subnet_a.id
+resource "aws_route_table_association" "public_a" {
+  subnet_id      = aws_subnet.public_a.id
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_route_table_association" "public_subnet_b" {
-  subnet_id      = aws_subnet.public_subnet_b.id
+resource "aws_route_table_association" "public_b" {
+  subnet_id      = aws_subnet.public_b.id
   route_table_id = aws_route_table.public.id
 }
-
-

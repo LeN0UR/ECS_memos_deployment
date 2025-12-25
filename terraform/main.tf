@@ -1,110 +1,48 @@
-# VPC
+# VPC  
+module "vpc" {
+  source = "./Modules/vpc"
 
-resource "aws_vpc" "vpc" {
-  cidr_block           = var.vpc_cidr
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+  vpc_name        = "memos-vpc"
+  vpc_cidr        = var.vpc_cidr
+  environment_tag = var.environment_tag
 
-  tags = {
-    Name        = "memos-vpc"
-    Environment = var.environment_tag
-  }
+  public_subnet_a_cidr = var.public_subnet_a_cidr
+  public_subnet_a_az   = var.public_subnet_a_az
+
+  public_subnet_b_cidr = var.public_subnet_b_cidr
+  public_subnet_b_az   = var.public_subnet_b_az
+
+  route_table_cidr = var.route_table_cidr
 }
 
-
-# Internet Gateway
-
-
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.vpc.id
-
-  tags = {
-    Name        = "memos-igw"
-    Environment = var.environment_tag
-  }
-}
-
-
-# Public Subnets
-
-
-resource "aws_subnet" "public_subnet_a" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.public_subnet_a_cidr
-  availability_zone       = var.public_subnet_a_az
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name        = "memos-public-subnet-a"
-    Environment = var.environment_tag
-  }
-}
-
-resource "aws_subnet" "public_subnet_b" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.public_subnet_b_cidr
-  availability_zone       = var.public_subnet_b_az
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name        = "memos-public-subnet-b"
-    Environment = var.environment_tag
-  }
-}
-
-
-# Public Route Table
-
-
-resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.vpc.id
-
-  route {
-    cidr_block = var.route_table_cidr # "0.0.0.0/0" from tfvars
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name        = "memos-public-rt"
-    Environment = var.environment_tag
-  }
-}
-
-# Route Table Associations
-
-resource "aws_route_table_association" "public_a" {
-  subnet_id      = aws_subnet.public_subnet_a.id
-  route_table_id = aws_route_table.public_rt.id
-}
-
-resource "aws_route_table_association" "public_b" {
-  subnet_id      = aws_subnet.public_subnet_b.id
-  route_table_id = aws_route_table.public_rt.id
-}
-
-
+# Security Groups
 module "security_groups" {
   source = "./Modules/security_groups"
 
-  vpc_id          = aws_vpc.vpc.id
-  alb_sg_name     = "memos alb sg"
-  ecs_sg_name     = "memos ecs sg"
-  allow_all_cidr  = "0.0.0.0/0"
+  vpc_id = module.vpc.vpc_id
+
+  alb_sg_name     = var.alb_sg_name
+  ecs_sg_name     = var.ecs_sg_name
+  allow_all_cidr  = var.allow_all_cidr
   http_port       = var.http_port
   https_port      = var.https_port
   app_port        = var.app_port
   environment_tag = var.environment_tag
 }
 
+# ACM (data block as cert already exists)
+data "aws_acm_certificate" "cert" {
+  domain      = "nourdemo.com"
+  statuses    = ["ISSUED"]
+  most_recent = true
+}
+
+# ALB
 module "alb" {
   source = "./Modules/alb"
 
-  vpc_id = aws_vpc.vpc.id
-  public_subnet_ids = [
-    aws_subnet.public_subnet_a.id,
-    aws_subnet.public_subnet_b.id,
-  ]
-
+  vpc_id                = module.vpc.vpc_id
+  public_subnet_ids     = module.vpc.public_subnet_ids
   security_group_id_alb = module.security_groups.alb_sg_id
 
   alb_name        = var.alb_name
@@ -123,24 +61,14 @@ module "alb" {
   health_check_unhealthy_threshold = var.health_check_unhealthy_threshold
 
   acm_certificate_arn = data.aws_acm_certificate.cert.arn
-
-
 }
 
-
-# ACM (data block as cert already exists)
-data "aws_acm_certificate" "cert" {
-  domain      = "nourdemo.com"
-  statuses    = ["ISSUED"]
-  most_recent = true
-}
-
-
+# ECS
 module "ecs" {
   source = "./Modules/ecs"
 
   # networking + integration
-  subnet_ids            = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
+  subnet_ids            = module.vpc.public_subnet_ids
   ecs_security_group_id = module.security_groups.ecs_sg_id
   target_group_arn      = module.alb.target_group_arn
 
@@ -175,6 +103,7 @@ module "ecs" {
   aws_region       = var.aws_region
 }
 
+# Route53
 module "route53" {
   source = "./Modules/route53"
 
